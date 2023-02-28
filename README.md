@@ -12,7 +12,7 @@
 
 ### Nastavnički tim: 
 - 👨‍🏫 Profesor: Doc.dr. Denis Čeke
-- 📧 Kontakt: Denis.Čeke@size.ba
+- 📧 Kontakt: Denis.Ceke@size.ba
 - 👨‍💻 Asistent: Adin Jahić
 - 📧 Kontakt: adin.jahic2019@size.ba
 
