@@ -48,4 +48,11 @@
 - Seminarski Rad: 30 bodova 
 - Prisustvo: 5 bodova 
 
+### Potrebni Programi
+
+- Git
+- Docker
+- WSL (Ubuntu)
+- VirtualBox
+- Vagrant
 
