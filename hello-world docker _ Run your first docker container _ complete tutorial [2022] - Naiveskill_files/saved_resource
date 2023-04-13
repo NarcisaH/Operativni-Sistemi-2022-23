@@ -1,0 +1,141 @@
+
+(function() {'use strict';
+    if (!Array.isArray){Array.isArray = function(arg){return Object.prototype.toString.call(arg) === '[object Array]';};}
+    if (!String.prototype.trim){String.prototype.trim = function () {return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');};}
+
+    var WPBruiserClient = function(){
+        var browserInfo = new Array();
+        function init(){
+            var w=window,d=document,e=0,f=0;e|=w.ActiveXObject?1:0;e|=w.opera?2:0;e|=w.chrome?4:0;
+            e|='getBoxObjectFor' in d || 'mozInnerScreenX' in w?8:0;e|=('WebKitCSSMatrix' in w||'WebKitPoint' in w||'webkitStorageInfo' in w||'webkitURL' in w)?16:0;
+            e|=(e&16&&({}.toString).toString().indexOf("\n")===-1)?32:0;f|='sandbox' in d.createElement('iframe')?1:0;f|='WebSocket' in w?2:0;
+            f|=w.Worker?4:0;f|=w.applicationCache?8:0;f|=w.history && history.pushState?16:0;f|=d.documentElement.webkitRequestFullScreen?32:0;f|='FileReader' in w?64:0;
+
+            var ua = navigator.userAgent.toLowerCase();
+            var regex = /compatible; ([\w.+]+)[ \/]([\w.+]*)|([\w .+]+)[: \/]([\w.+]+)|([\w.+]+)/g;
+            var match = regex.exec(ua);
+            browserInfo = {screenWidth:screen.width,screenHeight:screen.height,engine:e,features:f};
+            while (match !== null) {
+                var prop = {};
+                if (match[1]) {
+                    prop.type = match[1];
+                    prop.version = match[2];
+                } else if (match[3]) {
+                    prop.type = match[3];
+                    prop.version = match[4];
+                } else {
+                    prop.type = match[5];
+                }
+                prop.type = (prop.type).trim().replace('.','').replace(' ','_');
+                var value = prop.version ? prop.version : true;
+                if (browserInfo[prop.type]) {
+                    !Array.isArray(browserInfo[prop.type])?browserInfo[prop.type]=new Array(browserInfo[prop.type]):'';
+                    browserInfo[prop.type].push(value);
+                }
+                else browserInfo[prop.type] = value;
+                match = regex.exec(ua);
+            }
+        };
+
+        var requestTokens = function(){for(var i = 0; i < document.forms.length; ++i){retrieveToken(document.forms[i]);}};
+
+        function retrieveToken(formElement){
+
+            var requestObj = (window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
+
+            var formFieldElm = formElement.querySelector('input[name="ZI-gnf-S-R-H-Ct-hFV"]');
+            if(!requestObj || !formFieldElm) return;
+            var ajaxData = {};
+
+            ajaxData['ZI-gnf-S-R-H-Ct-hFV'] = '6cd9159894';
+            ajaxData['action']      = 'gdbcRetrieveToken';
+            ajaxData['requestTime'] = (new Date()).getTime();
+            ajaxData['browserInfo'] = JSON.stringify(browserInfo);
+
+            requestObj.open('POST', '/wp-admin/admin-ajax.php', true);
+            requestObj.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
+            requestObj.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            requestObj.setRequestHeader('Accept',"application/json, text/javascript, */*; q=0.01");
+            requestObj.send(serializeObject(ajaxData));
+
+            requestObj.onreadystatechange = function () {
+                if (4 === requestObj.readyState && 200 === requestObj.status)
+                {
+                    try
+                    {
+                        var rs = JSON.parse(requestObj.responseText);
+                        if(rs.data === 'undefined')
+                            return;
+                        
+                        var tokens = {};
+                        
+                        for(var p in rs.data)
+                        {
+                            if(p=='token')
+                            {
+                                formFieldElm.value = rs.data[p];
+                                tokens[formFieldElm.name] = null;
+                            }
+                            else
+                            {
+                                var value = '', arrValues = rs.data[p].split('|');
+                                for (var i = 0; i < arrValues.length; ++i) {
+                                    if (browserInfo.hasOwnProperty(arrValues[i]))
+                                        value += browserInfo[arrValues[i]];
+                                }
+
+                                var elm = document.createElement("input");elm.name = p;elm.value=value;elm.type='hidden';formElement.appendChild(elm);
+                                tokens[elm.name] = null;
+                                
+                                if((' ' + formElement.className + ' ').indexOf(' mailpoet_form ') > -1){
+                                    elm.name = 'data[' + p + ']';formFieldElm.name = 'data[' + formFieldElm.name + ']';
+                                }
+                            }
+                        }
+
+                         window.jQuery && jQuery.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+                            
+                            if(!formElement.querySelector('.nf-element'))
+                                return;
+                            console.log(options);console.log(originalOptions);
+                            
+                            if( !isObject(options) || !isObject(originalOptions) || !('data' in originalOptions) || !isObject(originalOptions.data))
+                                return;
+                            
+                            if( !('action' in originalOptions.data) || originalOptions.data.action !== 'nf_ajax_submit')
+                                return;
+
+                            for(var token in tokens){
+                                tokens[token] = formElement.querySelector('input[name="'+token+'"]');
+                                tokens[token] && (tokens[token] = tokens[token].value );
+                            }
+                            
+                            options.data = jQuery.param(jQuery.extend(originalOptions.data||{}, tokens));
+                            
+                        });
+                        
+                        
+                    }
+                    catch(e){console.log(e.message);}
+                }
+            }
+        }
+
+        init();
+
+        function isObject(a) {return (!!a) && (a.constructor === Object);}
+        
+        function serializeObject(obj) {
+            var str = [];
+            for(var p in obj)
+                if (obj.hasOwnProperty(p)) {
+                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                }
+            return str.join("&");
+        }
+        return {requestTokens : requestTokens};
+    }
+
+    window.WPBruiserClient = new WPBruiserClient();window.WPBruiserClient.requestTokens();
+
+})();

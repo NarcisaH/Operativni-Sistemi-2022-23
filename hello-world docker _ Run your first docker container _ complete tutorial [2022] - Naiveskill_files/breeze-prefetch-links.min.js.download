@@ -1,0 +1,4 @@
+/*! Created by Cloudways 
+ On 31-10-2022 */
+
+var timer,ready=e=>{"loading"!=document.readyState?e():document.addEventListener("DOMContentLoaded",e)};function search_for_banned_links(e,t){var r=!1;if(e.length)for(i=0;i<e.length;i++)-1===t.indexOf(e[i])&&-1===e[i].indexOf(t)||(r=!0);return r}ready(()=>{var i=[];addEventListener("mouseover",function(e){var n;e.target instanceof HTMLAnchorElement&&(n=e.target.attributes.href.value,timer=setTimeout(function(){var e,t,r;"#"!==n&&(r=n.replace(breeze_prefetch.local_url,""),e=new URL(breeze_prefetch.local_url).host,t=new URL(n).host,""!==n.trim()&&!1===i.includes(n)&&e===t&&!1===search_for_banned_links(breeze_prefetch.ignore_list,r)&&(i.push(n.trim()),(r=document.createElement("link")).href=n,r.rel="prefetch",document.head.appendChild(r)))},150))}),addEventListener("mouseout",function(e){clearTimeout(timer)})});
