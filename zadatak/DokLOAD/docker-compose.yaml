@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx
+    ports:
+      - "8888:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - C:/Users/User/Desktop/DokLOAD/cert:/etc/nginx/certs
+    depends_on:
+      - apache1
+      - apache2
+      - apache3
+
+  apache1:
+    image: httpd
+    restart: always
+    volumes:
+      - ./apache1:/usr/local/apache2/htdocs/
+
+  apache2:
+    image: httpd
+    restart: always
+    volumes:
+      - ./apache2:/usr/local/apache2/htdocs/
+
+  apache3:
+    image: httpd
+    restart: always
+    volumes:
+      - ./apache3:/usr/local/apache2/htdocs/
